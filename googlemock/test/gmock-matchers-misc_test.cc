@@ -1391,7 +1391,7 @@ TEST(ContainsTimes, ListMatchesWhenElementQuantityMatches) {
   EXPECT_THAT(some_list, Contains(3).Times(2));
   EXPECT_THAT(some_list, Contains(2).Times(1));
   EXPECT_THAT(some_list, Contains(Ge(2)).Times(3));
-  EXPECT_THAT(some_list, Contains(Ge(2)).Times(Gt(2)));
+  EXPECT_THAT(some_list, Contains(Ge(2)).Times(Gt(2u)));
   EXPECT_THAT(some_list, Contains(4).Times(0));
   EXPECT_THAT(some_list, Contains(_).Times(4));
   EXPECT_THAT(some_list, Not(Contains(5).Times(1)));
@@ -1428,7 +1428,7 @@ TEST_P(ContainsTimesP, ExplainsMatchResultCorrectly) {
   EXPECT_EQ("whose elements (0, 1) match and whose match quantity of 2 matches",
             Explain(m, a));
 
-  m = Contains(GreaterThan(10)).Times(Gt(1));
+  m = Contains(GreaterThan(10)).Times(Gt(1u));
   EXPECT_EQ(
       "has no element that matches and whose match quantity of 0 does not "
       "match",
