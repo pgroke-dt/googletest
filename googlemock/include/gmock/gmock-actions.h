@@ -1414,6 +1414,32 @@ struct WithArgsAction {
   using InnerSignature =
       R(typename std::tuple_element<I, std::tuple<Args...>>::type...);
 
+  // Helper types for the conversion operators enable_if. Unfortunately we can't
+  // use the std::is_convertible expressions directly in enable_if, because then
+  // MSVC 2022 (19.30), when compiling with /permissive-, fails with
+  //     C2039: 'type': is not a member of 'std'
+  // on the std::tuple lines.
+  template <typename R, typename... Args>
+  struct IsInnerActionConvertibleToOnceAction : std::is_convertible<
+      InnerAction,
+      // Unfortunately we can't use the InnerSignature alias here;
+      // MSVC complains about the I parameter pack not being
+      // expanded (error C3520) despite it being expanded in the
+      // type alias.
+      OnceAction<R(typename std::tuple_element<
+          I, std::tuple<Args...>>::type...)>> {
+  };
+  template <typename R, typename... Args>
+  struct IsInnerActionConvertibleToAction : std::is_convertible<
+      const InnerAction &,
+      // Unfortunately we can't use the InnerSignature alias here;
+      // MSVC complains about the I parameter pack not being
+      // expanded (error C3520) despite it being expanded in the
+      // type alias.
+      Action<R(typename std::tuple_element<
+          I, std::tuple<Args...>>::type...)>> {
+  };
+
   // Rather than a call operator, we must define conversion operators to
   // particular action types. This is necessary for embedded actions like
   // DoDefault(), which rely on an action conversion operators rather than
@@ -1422,14 +1448,7 @@ struct WithArgsAction {
 
   template <typename R, typename... Args,
             typename std::enable_if<
-                std::is_convertible<
-                    InnerAction,
-                    // Unfortunately we can't use the InnerSignature alias here;
-                    // MSVC complains about the I parameter pack not being
-                    // expanded (error C3520) despite it being expanded in the
-                    // type alias.
-                    OnceAction<R(typename std::tuple_element<
-                                 I, std::tuple<Args...>>::type...)>>::value,
+                IsInnerActionConvertibleToOnceAction<R, Args...>::value,
                 int>::type = 0>
   operator OnceAction<R(Args...)>() && {  // NOLINT
     struct OA {
@@ -1447,14 +1466,7 @@ struct WithArgsAction {
 
   template <typename R, typename... Args,
             typename std::enable_if<
-                std::is_convertible<
-                    const InnerAction&,
-                    // Unfortunately we can't use the InnerSignature alias here;
-                    // MSVC complains about the I parameter pack not being
-                    // expanded (error C3520) despite it being expanded in the
-                    // type alias.
-                    Action<R(typename std::tuple_element<
-                             I, std::tuple<Args...>>::type...)>>::value,
+                IsInnerActionConvertibleToAction<R, Args...>::value,
                 int>::type = 0>
   operator Action<R(Args...)>() const {  // NOLINT
     Action<InnerSignature<R, Args...>> converted(inner_action);
