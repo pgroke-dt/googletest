@@ -220,9 +220,9 @@ TEST(TypeTraits, IsInvocableRV) {
   static_assert(!internal::is_callable_r<void, C, int, int>::value, "");
 
   // In C++17 and above, where it's guaranteed that functions can return
-  // non-moveable objects, everything should work fine for non-moveable rsult
+  // non-moveable objects, everything should work fine for non-moveable result
   // types too.
-#if defined(__cplusplus) && __cplusplus >= 201703L
+#if defined(__cplusplus) && __cplusplus >= 201703L && !defined(_MSC_VER)
   {
     struct NonMoveable {
       NonMoveable() = default;
