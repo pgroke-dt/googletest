@@ -146,10 +146,8 @@
 #include "gmock/internal/gmock-port.h"
 #include "gmock/internal/gmock-pp.h"
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4100)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4100
+  /* 'identifier' : unreferenced formal parameter */)
 
 namespace testing {
 
@@ -173,6 +171,7 @@ template <typename T, bool kDefaultConstructible>
 struct BuiltInDefaultValueGetter {
   static T Get() { return T(); }
 };
+GTEST_DISABLE_MSC_WARNINGS_PUSH_(4702 /* unreachable code */)
 template <typename T>
 struct BuiltInDefaultValueGetter<T, false> {
   static T Get() {
@@ -183,6 +182,7 @@ struct BuiltInDefaultValueGetter<T, false> {
     // order for this function to compile.
   }
 };
+GTEST_DISABLE_MSC_WARNINGS_POP_()
 
 // BuiltInDefaultValue<T>::Get() returns the "built-in" default value
 // for type T, which is NULL when T is a raw pointer type, 0 when T is
@@ -2291,8 +2291,6 @@ template <typename F, typename Impl>
 
 }  // namespace testing
 
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
+GTEST_DISABLE_MSC_WARNINGS_POP_() // 4100
 
 #endif  // GOOGLEMOCK_INCLUDE_GMOCK_GMOCK_ACTIONS_H_
